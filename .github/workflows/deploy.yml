@@ -1,4 +1,4 @@
-name: CI/CD Deployment
+name: Real-Time Collaboration Tool
 
 on:
   push:
@@ -31,28 +31,31 @@ jobs:
         npm install
         npm run build
 
-    # Deployment Step (Template)
-    # This step requires SSH secrets to be set in GitHub Repository Secrets
+    # Deploy to EC2
     - name: Deploy to EC2
-      if: false # Set to true when secrets are configured
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          cd ~/app
+          cd ~/Real-Time-Collab-Tool
+
+          # Pull latest code
           git pull origin main
-          
-          # Restart Backend
+
+          # Backend
           cd backend
           npm install
           npm run build
           pm2 restart collab-backend || pm2 start dist/server.js --name collab-backend
-          
-          # Setup Frontend (Copy to Nginx folder)
+
+          # Frontend
           cd ../frontend
           npm install
           npm run build
+          sudo rm -rf /var/www/html/*
           sudo cp -r dist/* /var/www/html/
+
+          # Restart nginx
           sudo systemctl restart nginx
