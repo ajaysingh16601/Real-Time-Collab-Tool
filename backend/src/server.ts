@@ -22,7 +22,7 @@ app.use(cors());
 app.use(express.json());
 
 // health check
-app.get('/', (req, res) => {
+app.get('/health-check', (req, res) => {
   res.send('CollabFlow Server Running!');
 });
 // Routes
