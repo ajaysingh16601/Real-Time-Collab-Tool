@@ -21,6 +21,10 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 
+// health check
+app.get('/', (req, res) => {
+  res.send('CollabFlow Server Running!');
+});
 // Routes
 app.use('/api/sessions', sessionRoutes);
 
