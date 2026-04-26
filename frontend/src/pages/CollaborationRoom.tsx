@@ -38,11 +38,37 @@ const CollaborationRoom: React.FC = () => {
     updateEditor 
   } = useSocket(sessionId || null, username || null);
 
-  const handleCopyId = () => {
-    if (sessionId) {
-      navigator.clipboard.writeText(sessionId);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+  const handleCopyId = async () => {
+    if (!sessionId) return;
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(sessionId);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } else {
+        // Fallback for non-secure contexts or older browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = sessionId;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          document.execCommand('copy');
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+          console.error("Fallback: Oops, unable to copy", err);
+        } finally {
+          textArea.remove();
+        }
+      }
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
     }
   };
 
